@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { User, Post } from '@/types'
 import Link from 'next/link'
 import CreatePostModal from '@/components/post/CreatePostModal'
@@ -47,10 +47,25 @@ export default function FacebookProfile({ userId, currentUserId, currentWalletAd
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [walletAddress, setWalletAddress] = useState<string | null>(null)
   
-  // Check if this is the user's own profile by comparing both UUID and wallet address
-  const isOwnProfile = userId === currentUserId || 
-                       (currentWalletAddress && userId === currentWalletAddress) ||
-                       (walletAddress && currentWalletAddress && walletAddress === currentWalletAddress)
+  // Check if this is the user's own profile - recalculate when dependencies change
+  const isOwnProfile = useMemo(() => {
+    const result = userId === currentUserId || 
+           (currentWalletAddress && userId === currentWalletAddress) ||
+           (walletAddress && currentWalletAddress && walletAddress === currentWalletAddress)
+    
+    console.log('isOwnProfile calculation:', {
+      result,
+      userId,
+      currentUserId,
+      currentWalletAddress,
+      walletAddress,
+      match1: userId === currentUserId,
+      match2: currentWalletAddress && userId === currentWalletAddress,
+      match3: walletAddress && currentWalletAddress && walletAddress === currentWalletAddress
+    })
+    
+    return result
+  }, [userId, currentUserId, currentWalletAddress, walletAddress])
 
   useEffect(() => {
     fetchProfile()
