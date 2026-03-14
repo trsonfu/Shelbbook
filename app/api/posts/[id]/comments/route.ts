@@ -4,10 +4,10 @@ import { getCurrentUser } from '@/lib/auth'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id: postId } = params
+    const { id: postId } = await params
 
     const { data: comments, error } = await supabase
       .from('comments')
@@ -34,7 +34,7 @@ export async function GET(
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const user = await getCurrentUser()
@@ -45,16 +45,17 @@ export async function POST(
       )
     }
 
-    const { id: postId } = params
+    const { id: postId } = await params
     const { content } = await request.json()
 
-    if (!content || content.trim().length === 0) {
+    if (!content || !content.trim()) {
       return NextResponse.json(
         { error: 'Comment content is required' },
         { status: 400 }
       )
     }
 
+    // Create comment
     const { data: comment, error } = await supabase
       .from('comments')
       .insert({

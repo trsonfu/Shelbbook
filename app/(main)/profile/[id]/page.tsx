@@ -5,7 +5,7 @@ import FacebookProfile from '@/components/profile/FacebookProfile'
 export default async function ProfilePage({
   params,
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
   const session = await getSession()
 
@@ -13,9 +13,20 @@ export default async function ProfilePage({
     redirect('/login')
   }
 
+  // Await params to get the id
+  const { id } = await params
+
+  // Use wallet address from session instead of getCurrentUser
+  // since getCurrentUser requires the user to exist in database
+  const currentWalletAddress = session.walletAddress
+
   return (
     <div className="min-h-screen py-4">
-      <FacebookProfile userId={params.id} currentUserId={session.userId} />
+      <FacebookProfile 
+        userId={id} 
+        currentUserId={session.userId}
+        currentWalletAddress={currentWalletAddress}
+      />
     </div>
   )
 }

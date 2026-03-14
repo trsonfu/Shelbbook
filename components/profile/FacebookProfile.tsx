@@ -4,10 +4,12 @@ import { useState, useEffect } from 'react'
 import { User, Post } from '@/types'
 import Link from 'next/link'
 import CreatePostModal from '@/components/post/CreatePostModal'
+import ProfileEditModal from '@/components/profile/ProfileEditModal'
 
 interface FacebookProfileProps {
   userId: string
   currentUserId: string
+  currentWalletAddress?: string
 }
 
 function IconEdit(props: { className?: string }) {
@@ -34,7 +36,7 @@ function IconPlus(props: { className?: string }) {
   )
 }
 
-export default function FacebookProfile({ userId, currentUserId }: FacebookProfileProps) {
+export default function FacebookProfile({ userId, currentUserId, currentWalletAddress }: FacebookProfileProps) {
   const [user, setUser] = useState<User | null>(null)
   const [posts, setPosts] = useState<Post[]>([])
   const [isFollowing, setIsFollowing] = useState(false)
@@ -42,7 +44,13 @@ export default function FacebookProfile({ userId, currentUserId }: FacebookProfi
   const [followingCount, setFollowingCount] = useState(0)
   const [loading, setLoading] = useState(true)
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const isOwnProfile = userId === currentUserId
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [walletAddress, setWalletAddress] = useState<string | null>(null)
+  
+  // Check if this is the user's own profile by comparing both UUID and wallet address
+  const isOwnProfile = userId === currentUserId || 
+                       (currentWalletAddress && userId === currentWalletAddress) ||
+                       (walletAddress && currentWalletAddress && walletAddress === currentWalletAddress)
 
   useEffect(() => {
     fetchProfile()
@@ -53,13 +61,23 @@ export default function FacebookProfile({ userId, currentUserId }: FacebookProfi
   const fetchProfile = async () => {
     try {
       const response = await fetch(`/api/users/${userId}`)
-      if (!response.ok) {
-        throw new Error('Failed to fetch profile')
-      }
       const data = await response.json()
-      setUser(data.user)
-      setFollowersCount(data.followersCount || 0)
-      setFollowingCount(data.followingCount || 0)
+      
+      console.log('Profile API Response:', data)
+      console.log('userId:', userId)
+      console.log('currentUserId:', currentUserId)
+      console.log('currentWalletAddress:', currentWalletAddress)
+      
+      if (data.user) {
+        setUser(data.user)
+        setFollowersCount(data.followersCount || 0)
+        setFollowingCount(data.followingCount || 0)
+      } else if (data.walletAddress) {
+        // User not found but we have wallet address
+        console.log('Setting walletAddress from API:', data.walletAddress)
+        setWalletAddress(data.walletAddress)
+        setUser(null)
+      }
     } catch (error) {
       console.error('Error fetching profile:', error)
     } finally {
@@ -71,7 +89,7 @@ export default function FacebookProfile({ userId, currentUserId }: FacebookProfi
     try {
       const response = await fetch(`/api/posts?userId=${userId}`)
       if (!response.ok) {
-        throw new Error('Failed to fetch posts')
+        return
       }
       const data = await response.json()
       setPosts(data.posts || [])
@@ -81,7 +99,7 @@ export default function FacebookProfile({ userId, currentUserId }: FacebookProfi
   }
 
   const fetchFollowStatus = async () => {
-    if (isOwnProfile) return
+    if (isOwnProfile || !user) return
 
     try {
       const response = await fetch(`/api/users/${userId}/follow`)
@@ -109,6 +127,27 @@ export default function FacebookProfile({ userId, currentUserId }: FacebookProfi
     }
   }
 
+  const handleSaveProfile = async (data: { display_name: string; bio: string; avatar_url: string }) => {
+    try {
+      const response = await fetch(`/api/users/${userId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to update profile')
+      }
+
+      const result = await response.json()
+      setUser(result.user)
+      setIsEditModalOpen(false)
+    } catch (error) {
+      console.error('Error updating profile:', error)
+      alert('Failed to update profile')
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex flex-col justify-center items-center min-h-screen">
@@ -118,10 +157,66 @@ export default function FacebookProfile({ userId, currentUserId }: FacebookProfi
     )
   }
 
+  // Show setup profile UI if user doesn't exist but it's their own profile
+  console.log('Render check:', { 
+    user: !!user, 
+    isOwnProfile, 
+    walletAddress,
+    userId,
+    currentWalletAddress,
+    comparison: userId === currentWalletAddress 
+  })
+  
+  // Check if it's own profile even without walletAddress state (use direct comparison)
+  const isDefinitelyOwnProfile = userId === currentUserId || 
+                                  (currentWalletAddress && userId === currentWalletAddress) ||
+                                  (walletAddress && currentWalletAddress && walletAddress === currentWalletAddress)
+  
+  if (!user && isDefinitelyOwnProfile) {
+    return (
+      <>
+        <div className="max-w-[600px] mx-auto px-4 py-12">
+          <div className="bg-white dark:bg-[#242526] rounded-lg shadow-lg p-8 text-center">
+            <div className="w-24 h-24 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold text-3xl mx-auto mb-4">
+              {(walletAddress || userId).slice(2, 4).toUpperCase()}
+            </div>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+              Welcome to Shelbook!
+            </h1>
+            <p className="text-gray-600 dark:text-gray-400 mb-6">
+              Let's set up your profile to get started
+            </p>
+            <button
+              onClick={() => setIsEditModalOpen(true)}
+              className="px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition-colors"
+            >
+              Set Up Profile
+            </button>
+            <div className="mt-6 p-4 bg-gray-50 dark:bg-[#3a3b3c] rounded-lg">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                <strong>Wallet:</strong> {(walletAddress || userId).slice(0, 10)}...{(walletAddress || userId).slice(-8)}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <ProfileEditModal
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          onSave={handleSaveProfile}
+          initialData={{}}
+        />
+      </>
+    )
+  }
+
   if (!user) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-600 dark:text-gray-400">User not found</p>
+        <p className="text-gray-600 dark:text-gray-400 text-lg">User not found</p>
+        <p className="text-gray-500 dark:text-gray-500 mt-2">
+          This user hasn't set up their profile yet
+        </p>
       </div>
     )
   }
@@ -181,7 +276,10 @@ export default function FacebookProfile({ userId, currentUserId }: FacebookProfi
                       <IconPlus className="w-5 h-5" />
                       Add to story
                     </button>
-                    <button className="flex items-center gap-2 px-4 py-2 bg-gray-200 dark:bg-[#3a3b3c] hover:bg-gray-300 dark:hover:bg-[#4e4f50] text-gray-900 dark:text-gray-100 font-semibold rounded-lg transition-colors">
+                    <button 
+                      onClick={() => setIsEditModalOpen(true)}
+                      className="flex items-center gap-2 px-4 py-2 bg-gray-200 dark:bg-[#3a3b3c] hover:bg-gray-300 dark:hover:bg-[#4e4f50] text-gray-900 dark:text-gray-100 font-semibold rounded-lg transition-colors"
+                    >
                       <IconEdit className="w-5 h-5" />
                       Edit profile
                     </button>
@@ -309,14 +407,26 @@ export default function FacebookProfile({ userId, currentUserId }: FacebookProfi
       </div>
 
       {isOwnProfile && (
-        <CreatePostModal
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-          onSuccess={() => {
-            setIsModalOpen(false)
-            fetchPosts()
-          }}
-        />
+        <>
+          <CreatePostModal
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            onSuccess={() => {
+              setIsModalOpen(false)
+              fetchPosts()
+            }}
+          />
+          <ProfileEditModal
+            isOpen={isEditModalOpen}
+            onClose={() => setIsEditModalOpen(false)}
+            onSave={handleSaveProfile}
+            initialData={{
+              display_name: user?.display_name,
+              bio: user?.bio,
+              avatar_url: user?.avatar_url,
+            }}
+          />
+        </>
       )}
     </>
   )

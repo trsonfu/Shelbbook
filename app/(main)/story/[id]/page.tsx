@@ -5,7 +5,7 @@ import { mockPosts } from '@/lib/mock/posts'
 export default async function StoryViewPage({
   params,
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
   const session = await getSession()
 
@@ -13,7 +13,8 @@ export default async function StoryViewPage({
     redirect('/login')
   }
 
-  const story = mockPosts.find((p) => `story_${p.id}` === params.id) ?? mockPosts[0]
+  const { id } = await params
+  const story = mockPosts.find((p) => `story_${p.id}` === id) ?? mockPosts[0]
 
   if (!story) {
     redirect('/')

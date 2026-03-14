@@ -81,9 +81,11 @@ export default function FacebookHeader() {
         {/* Left: Logo & Search */}
         <div className="flex items-center gap-2 flex-1 min-w-0 max-w-xs">
           <Link href="/" className="flex-shrink-0">
-            <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold text-xl">
-              S
-            </div>
+            <img 
+              src="/logo.png" 
+              alt="Shelbook" 
+              className="w-10 h-10 object-contain"
+            />
           </Link>
           
           <div className={clsx(
@@ -154,6 +156,23 @@ export default function FacebookHeader() {
             <IconBell className="w-5 h-5 text-gray-700 dark:text-gray-200" />
             <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
           </button>
+          
+          {/* Profile Avatar Button */}
+          {account && (
+            <Link
+              href={`/profile/${account.address.toString()}`}
+              className={clsx(
+                "flex items-center justify-center w-10 h-10 rounded-full bg-blue-500 hover:bg-blue-600 transition-colors border-2",
+                isActive(`/profile/${account.address.toString()}`) 
+                  ? "border-blue-500" 
+                  : "border-transparent"
+              )}
+            >
+              <span className="text-white font-semibold text-sm">
+                {account.address.toString().slice(0, 2).toUpperCase()}
+              </span>
+            </Link>
+          )}
           
           <div className="hidden sm:block">
             <XChainWalletSelector size="sm" />

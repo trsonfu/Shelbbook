@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useWallet } from '@aptos-labs/wallet-adapter-react'
 import clsx from 'clsx'
 
 type BottomItem = {
@@ -26,24 +27,6 @@ function IconHome(props: { className?: string }) {
     >
       <path d="M3.5 10.25 12 3l8.5 7.25" />
       <path d="M6 10v10h12V10" />
-    </svg>
-  )
-}
-
-function IconSearch(props: { className?: string }) {
-  return (
-    <svg
-      className={props.className}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <circle cx="11" cy="11" r="6" />
-      <path d="m20 20-3.5-3.5" />
     </svg>
   )
 }
@@ -84,7 +67,7 @@ function IconExplore(props: { className?: string }) {
   )
 }
 
-function IconProfile(props: { className?: string }) {
+function IconBell(props: { className?: string }) {
   return (
     <svg
       className={props.className}
@@ -96,14 +79,15 @@ function IconProfile(props: { className?: string }) {
       strokeLinejoin="round"
       aria-hidden="true"
     >
-      <circle cx="12" cy="9" r="3.2" />
-      <path d="M6 20c0-3 2.5-5 6-5s6 2 6 5" />
+      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+      <path d="M13.73 21a2 2 0 0 1-3.46 0" />
     </svg>
   )
 }
 
 export default function BottomNav() {
   const pathname = usePathname()
+  const { account } = useWallet()
 
   const items: BottomItem[] = [
     {
@@ -121,23 +105,31 @@ export default function BottomNav() {
     },
     {
       key: 'create',
-      href: '/create',
+      href: '/',
       label: 'Create',
       icon: <IconPlus className="w-6 h-6" />,
-      match: (p) => p.startsWith('/create'),
+      match: (p) => false,
     },
     {
-      key: 'search',
-      href: '/search',
-      label: 'Search',
-      icon: <IconSearch className="w-5 h-5" />,
+      key: 'notifications',
+      href: '#',
+      label: 'Notifications',
+      icon: <IconBell className="w-5 h-5" />,
     },
     {
       key: 'profile',
-      href: '/profile/mock',
+      href: account ? `/profile/${account.address.toString()}` : '#',
       label: 'Profile',
-      icon: <IconProfile className="w-5 h-5" />,
-      match: (p) => p.startsWith('/profile'),
+      icon: account ? (
+        <div className="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-semibold">
+          {account.address.toString().slice(0, 2).toUpperCase()}
+        </div>
+      ) : (
+        <div className="w-6 h-6 rounded-full bg-gray-400 flex items-center justify-center text-white text-xs">
+          U
+        </div>
+      ),
+      match: (p) => account ? p.startsWith(`/profile/${account.address.toString()}`) : false,
     },
   ]
 
@@ -177,4 +169,5 @@ export default function BottomNav() {
     </nav>
   )
 }
+
 

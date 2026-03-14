@@ -5,7 +5,7 @@ import PostDetail from '@/components/post/PostDetail'
 export default async function PostPage({
   params,
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
   const session = await getSession()
 
@@ -13,5 +13,7 @@ export default async function PostPage({
     redirect('/login')
   }
 
-  return <PostDetail postId={params.id} />
+  const { id } = await params
+
+  return <PostDetail postId={id} />
 }

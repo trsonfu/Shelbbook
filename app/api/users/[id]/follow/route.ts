@@ -4,7 +4,7 @@ import { getCurrentUser } from '@/lib/auth'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const currentUser = await getCurrentUser()
@@ -15,7 +15,7 @@ export async function GET(
       )
     }
 
-    const { id: followingId } = params
+    const { id: followingId } = await params
 
     const { data: follow } = await supabase
       .from('follows')
@@ -28,16 +28,17 @@ export async function GET(
       isFollowing: !!follow,
     })
   } catch (error: any) {
+    console.error('Error checking follow status:', error)
     return NextResponse.json(
-      { isFollowing: false },
-      { status: 200 }
+      { error: error.message || 'Failed to check follow status' },
+      { status: 500 }
     )
   }
 }
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const currentUser = await getCurrentUser()
@@ -48,14 +49,7 @@ export async function POST(
       )
     }
 
-    const { id: followingId } = params
-
-    if (currentUser.id === followingId) {
-      return NextResponse.json(
-        { error: 'Cannot follow yourself' },
-        { status: 400 }
-      )
-    }
+    const { id: followingId } = await params
 
     // Check if already following
     const { data: existingFollow } = await supabase
@@ -66,22 +60,20 @@ export async function POST(
       .single()
 
     if (existingFollow) {
-      return NextResponse.json({ success: true, isFollowing: true })
+      return NextResponse.json({ success: true, following: true })
     }
 
     // Create follow
-    const { error } = await supabase
-      .from('follows')
-      .insert({
-        follower_id: currentUser.id,
-        following_id: followingId,
-      })
+    const { error } = await supabase.from('follows').insert({
+      follower_id: currentUser.id,
+      following_id: followingId,
+    })
 
     if (error) {
       throw error
     }
 
-    return NextResponse.json({ success: true, isFollowing: true })
+    return NextResponse.json({ success: true, following: true })
   } catch (error: any) {
     console.error('Error following user:', error)
     return NextResponse.json(
@@ -93,7 +85,7 @@ export async function POST(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const currentUser = await getCurrentUser()
@@ -104,8 +96,9 @@ export async function DELETE(
       )
     }
 
-    const { id: followingId } = params
+    const { id: followingId } = await params
 
+    // Delete follow
     const { error } = await supabase
       .from('follows')
       .delete()
@@ -116,7 +109,7 @@ export async function DELETE(
       throw error
     }
 
-    return NextResponse.json({ success: true, isFollowing: false })
+    return NextResponse.json({ success: true, following: false })
   } catch (error: any) {
     console.error('Error unfollowing user:', error)
     return NextResponse.json(
