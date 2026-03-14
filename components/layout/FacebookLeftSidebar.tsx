@@ -69,7 +69,7 @@ export default function FacebookLeftSidebar() {
         {/* User Profile Link */}
         {account && (
           <Link
-            href={`/profile/${account.address.toString()}`}
+            href={`/profile/${account.address.toString()}` as any}
             className="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-[#3a3b3c] transition-colors"
           >
             <div className="w-9 h-9 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold text-sm flex-shrink-0">
@@ -85,7 +85,7 @@ export default function FacebookLeftSidebar() {
         {navItems.map((item, index) => (
           <Link
             key={index}
-            href={item.href}
+            href={item.href as any}
             className={clsx(
               "flex items-center gap-3 px-2 py-2 rounded-lg transition-colors",
               item.active

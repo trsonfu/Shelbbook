@@ -7,7 +7,7 @@ import clsx from 'clsx'
 
 type BottomItem = {
   key: string
-  href: string
+  href: string | `#`
   label: string
   icon: React.ReactNode
   match?: (pathname: string) => boolean
@@ -110,7 +110,7 @@ export default function BottomNav() {
           return (
             <Link
               key={item.key}
-              href={item.href}
+              href={item.href as any}
               className={clsx(
                 'flex flex-col items-center justify-center gap-1 rounded-lg px-3 py-2 transition-colors',
                 active
