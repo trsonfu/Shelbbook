@@ -67,7 +67,7 @@ function IconSearch(props: { className?: string }) {
   )
 }
 
-export default function FacebookHeader() {
+export default function ShelbookHeader() {
   const pathname = usePathname()
   const { account } = useWallet()
   const { user } = useCurrentUser()
@@ -105,31 +105,6 @@ export default function FacebookHeader() {
             />
           </div>
         </div>
-
-        {/* Center: Navigation Icons */}
-        <nav className="hidden md:flex items-center justify-center gap-2 flex-1 max-w-xl">
-          <Link
-            href="/"
-            className={clsx(
-              "relative flex items-center justify-center w-28 h-12 rounded-lg transition-colors",
-              isActive('/') 
-                ? "text-blue-500" 
-                : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#3a3b3c]"
-            )}
-          >
-            <IconHomeAlt className="w-7 h-7" />
-            {isActive('/') && (
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500" />
-            )}
-          </Link>
-          
-          <Link
-            href="#"
-            className="flex items-center justify-center w-28 h-12 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#3a3b3c] transition-colors"
-          >
-            <IconUsers className="w-6 h-6" />
-          </Link>
-        </nav>
 
         {/* Right: Actions & Profile */}
         <div className="flex items-center justify-end gap-2 flex-1">

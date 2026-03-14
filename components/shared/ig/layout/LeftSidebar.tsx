@@ -6,7 +6,7 @@ import clsx from 'clsx'
 import { useEffect, useRef, useState } from 'react'
 import { useWallet } from '@aptos-labs/wallet-adapter-react'
 import { XChainWalletSelector } from '@shelby-protocol/ui/components/x-chain-wallet-selector'
-import ThemeToggle from '@/components/layout/ThemeToggle'
+import ThemeToggle from '@/components/shared/layout/ThemeToggle'
 
 type BaseLinkProps = LinkProps<string>
 

@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import { Post } from '@/types'
-import { formatDate } from '@/lib/utils'
+import { formatDate } from '@/lib/core/utils'
 import Link from 'next/link'
 
 interface PostCardProps {
@@ -90,7 +90,7 @@ export default function PostCard({ post }: PostCardProps) {
         </button>
       </div>
 
-      {/* Caption - Before Media (Facebook style) */}
+      {/* Caption - Before Media (Shelbook style) */}
       {post.caption && (
         <div className="px-4 pb-3">
           <p className="text-gray-900 dark:text-gray-100 text-[15px] leading-relaxed whitespace-pre-wrap">

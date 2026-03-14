@@ -1,5 +1,5 @@
-import { getSession } from '@/lib/auth'
-import FacebookProfile from '@/components/profile/FacebookProfile'
+import { getSession } from '@/lib/features/auth'
+import ShelbookProfile from '@/components/features/profile/ShelbookProfile'
 
 export default async function ProfilePage({
   params,
@@ -17,7 +17,7 @@ export default async function ProfilePage({
 
   return (
     <div className="min-h-screen py-4">
-      <FacebookProfile 
+      <ShelbookProfile 
         userId={id} 
         currentUserId={currentUserId}
         currentWalletAddress={currentWalletAddress}

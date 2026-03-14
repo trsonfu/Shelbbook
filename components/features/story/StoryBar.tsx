@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import { mockPosts } from '@/lib/mock/posts'
+import { mockPosts } from '@/lib/core/mock/posts'
 
 type StoryChip = {
   id: string

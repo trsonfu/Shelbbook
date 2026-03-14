@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { mockPosts } from '@/lib/mock/posts'
+import { mockPosts } from '@/lib/core/mock/posts'
 
 export default function ExploreGrid() {
   const items = [...mockPosts, ...mockPosts].map((p, idx) => ({

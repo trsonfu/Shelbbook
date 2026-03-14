@@ -1,5 +1,5 @@
-import Feed from '@/components/post/Feed'
-import ThemeToggle from '@/components/layout/ThemeToggle'
+import Feed from '@/components/features/post/Feed'
+import ThemeToggle from '@/components/shared/layout/ThemeToggle'
 
 export default async function HomePage() {
   return (

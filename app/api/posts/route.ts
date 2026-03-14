@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
-import { getSession } from '@/lib/auth'
+import { supabase } from '@/lib/core/supabase'
+import { getSession } from '@/lib/features/auth'
 
 export async function GET() {
   try {

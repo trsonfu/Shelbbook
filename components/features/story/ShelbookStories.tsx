@@ -30,7 +30,7 @@ type Story = {
   }
 }
 
-export default function FacebookStories() {
+export default function ShelbookStories() {
   const { account } = useWallet()
   const { user } = useCurrentUser()
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)

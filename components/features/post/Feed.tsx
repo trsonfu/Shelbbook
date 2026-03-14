@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import PostCard from './PostCard'
 import CreatePostBox from './CreatePostBox'
-import FacebookStories from '@/components/story/FacebookStories'
+import ShelbookStories from '@/components/features/story/ShelbookStories'
 import type { Post } from '@/types'
 
 // Mock posts for demo purposes
@@ -138,7 +138,7 @@ export default function Feed() {
   return (
     <div>
       {/* Stories Section */}
-      <FacebookStories />
+      <ShelbookStories />
 
       {/* Create Post Box */}
       <CreatePostBox />

@@ -16,11 +16,11 @@
 
 ## System Overview
 
-Shelbook is a Facebook-style social media application that combines:
+Shelbook is a Shelbook-style social media application that combines:
 - **Decentralized Storage** - Files stored on Aptos blockchain via Shelby Protocol
 - **Traditional Database** - Metadata and relationships in Supabase (PostgreSQL)
 - **Web3 Authentication** - Wallet-based login (no passwords)
-- **Modern UI/UX** - Responsive Facebook-inspired interface
+- **Modern UI/UX** - Responsive Shelbook-inspired interface
 
 ---
 
@@ -479,7 +479,7 @@ story-{timestamp}-{filename}
 ## Story Feature
 
 ### Overview
-Stories are temporary posts that expire after 24 hours, similar to Instagram/Facebook Stories.
+Stories are temporary posts that expire after 24 hours, similar to Instagram/Shelbook Stories.
 
 ### Key Features
 - **24-Hour Expiry** - Auto-deleted after `expires_at` timestamp
@@ -590,14 +590,14 @@ Stories are temporary posts that expire after 24 hours, similar to Instagram/Fac
 
 ### Layout Components
 ```
-FacebookHeader (top nav)
+ShelbookHeader (top nav)
 ├─ Logo
 ├─ Search bar
 ├─ Navigation icons (Home, Friends)
 ├─ Wallet selector
 └─ Profile avatar
 
-FacebookLeftSidebar
+ShelbookLeftSidebar
 ├─ User profile link
 ├─ Navigation items
 └─ Shortcuts
@@ -612,7 +612,7 @@ BottomNav (mobile)
 ### Content Components
 ```
 Feed
-├─ FacebookStories (horizontal carousel)
+├─ ShelbookStories (horizontal carousel)
 │  ├─ Create Story button → CreateStoryModal
 │  └─ Story cards → /story/[id]
 ├─ CreatePostBox → CreatePostModal

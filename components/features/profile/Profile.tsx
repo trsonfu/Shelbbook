@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { User, Post } from '@/types'
-import { formatDate } from '@/lib/utils'
-import PostCard from '@/components/post/PostCard'
+import { formatDate } from '@/lib/core/utils'
+import PostCard from '@/components/features/post/PostCard'
 import Link from 'next/link'
 
 interface ProfileProps {

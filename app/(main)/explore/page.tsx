@@ -1,4 +1,4 @@
-import ExploreGrid from '@/components/post/ExploreGrid'
+import ExploreGrid from '@/components/features/post/ExploreGrid'
 
 export default async function ExplorePage() {
   return (

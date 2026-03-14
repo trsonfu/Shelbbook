@@ -39,7 +39,7 @@ function IconChevronDown(props: { className?: string }) {
   )
 }
 
-export default function FacebookLeftSidebar() {
+export default function ShelbookLeftSidebar() {
   const pathname = usePathname()
   const { account } = useWallet()
   const { user } = useCurrentUser()

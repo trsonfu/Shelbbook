@@ -34,7 +34,7 @@ type Contact = {
   online: boolean
 }
 
-export default function FacebookRightSidebar() {
+export default function ShelbookRightSidebar() {
   const [contacts, setContacts] = useState<Contact[]>([])
 
   useEffect(() => {

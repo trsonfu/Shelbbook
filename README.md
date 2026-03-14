@@ -15,7 +15,7 @@
 
 ---
 
-*Facebook-style UI with Web3 technology • Wallet-based authentication • Decentralized file storage*
+*Shelbook-style UI with Web3 technology • Wallet-based authentication • Decentralized file storage*
 
 </div>
 
@@ -23,10 +23,10 @@
 
 ## ✨ Features
 
-- 📱 **Facebook-Style Interface** - Familiar and intuitive UI/UX
+- 📱 **Shelbook-Style Interface** - Familiar and intuitive UI/UX
 - 🔐 **Web3 Authentication** - No passwords, just connect your Aptos wallet
 - 📸 **Posts & Stories** - Share images and videos with decentralized storage
-- ⏱️ **24-Hour Stories** - Auto-expiring stories like Instagram/Facebook
+- ⏱️ **24-Hour Stories** - Auto-expiring stories like Instagram/Shelbook
 - 💾 **Decentralized Storage** - Files stored on Aptos blockchain via Shelby Protocol
 - 👤 **User Profiles** - Customizable profiles with avatar, bio, and stats
 - 💬 **Comments & Likes** - Full social interactions

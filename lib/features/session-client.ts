@@ -1,6 +1,6 @@
 'use client'
 
-import type { Session } from '@/lib/auth'
+import type { Session } from '@/lib/features/auth'
 
 const SESSION_COOKIE_NAME = 'session'
 

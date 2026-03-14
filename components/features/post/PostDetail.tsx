@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Post, Comment } from '@/types'
-import { formatDate } from '@/lib/utils'
+import { formatDate } from '@/lib/core/utils'
 import Link from 'next/link'
 
 interface PostDetailProps {

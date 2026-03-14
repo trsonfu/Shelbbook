@@ -3,10 +3,10 @@
 import { useState, useEffect, useMemo } from 'react'
 import { User, Post } from '@/types'
 import Link from 'next/link'
-import CreatePostModal from '@/components/post/CreatePostModal'
-import ProfileEditModal from '@/components/profile/ProfileEditModal'
+import CreatePostModal from '@/components/features/post/CreatePostModal'
+import ProfileEditModal from '@/components/features/profile/ProfileEditModal'
 
-interface FacebookProfileProps {
+interface ShelbookProfileProps {
   userId: string
   currentUserId?: string
   currentWalletAddress?: string
@@ -36,7 +36,7 @@ function IconPlus(props: { className?: string }) {
   )
 }
 
-export default function FacebookProfile({ userId, currentUserId, currentWalletAddress }: FacebookProfileProps) {
+export default function ShelbookProfile({ userId, currentUserId, currentWalletAddress }: ShelbookProfileProps) {
   const [user, setUser] = useState<User | null>(null)
   const [posts, setPosts] = useState<Post[]>([])
   const [isFollowing, setIsFollowing] = useState(false)
@@ -49,7 +49,7 @@ export default function FacebookProfile({ userId, currentUserId, currentWalletAd
   
   // Log component props on mount
   useEffect(() => {
-    console.log('=== FacebookProfile Component Props ===')
+    console.log('=== ShelbookProfile Component Props ===')
     console.log('userId:', userId)
     console.log('currentUserId:', currentUserId)
     console.log('currentWalletAddress:', currentWalletAddress)

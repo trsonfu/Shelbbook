@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation'
-import { mockPosts } from '@/lib/mock/posts'
+import { mockPosts } from '@/lib/core/mock/posts'
 
 export default async function StoryViewPage({
   params,

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getCurrentUser } from '@/lib/auth'
-import { supabase } from '@/lib/supabase'
+import { getCurrentUser } from '@/lib/features/auth'
+import { supabase } from '@/lib/core/supabase'
 
 export async function POST(request: NextRequest) {
   try {

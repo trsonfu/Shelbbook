@@ -1,9 +1,9 @@
 import type { ReactNode } from 'react'
-import FacebookHeader from '@/components/layout/FacebookHeader'
-import FacebookLeftSidebar from '@/components/layout/FacebookLeftSidebar'
-import FacebookRightSidebar from '@/components/layout/FacebookRightSidebar'
-import BottomNav from '@/components/layout/BottomNav'
-import { WalletChangeDetector } from '@/components/auth/WalletChangeDetector'
+import ShelbookHeader from '@/components/shared/layout/ShelbookHeader'
+import ShelbookLeftSidebar from '@/components/shared/layout/ShelbookLeftSidebar'
+import ShelbookRightSidebar from '@/components/shared/layout/ShelbookRightSidebar'
+import BottomNav from '@/components/shared/layout/BottomNav'
+import { WalletChangeDetector } from '@/components/features/auth/WalletChangeDetector'
 
 export default function MainLayout({ children }: { children: ReactNode }) {
   return (
@@ -12,12 +12,12 @@ export default function MainLayout({ children }: { children: ReactNode }) {
       <WalletChangeDetector />
       
       {/* Fixed Header */}
-      <FacebookHeader />
+      <ShelbookHeader />
 
       {/* Three-column layout */}
       <div className="pt-14">
         {/* Left Sidebar - Desktop only */}
-        <FacebookLeftSidebar />
+        <ShelbookLeftSidebar />
 
         {/* Main Content - Center column */}
         <main className="lg:ml-72 xl:mr-80 min-h-[calc(100vh-3.5rem)]">
@@ -25,7 +25,7 @@ export default function MainLayout({ children }: { children: ReactNode }) {
         </main>
 
         {/* Right Sidebar - Desktop only */}
-        <FacebookRightSidebar />
+        <ShelbookRightSidebar />
 
         {/* Mobile bottom nav */}
         <div className="md:hidden fixed bottom-0 left-0 right-0 z-40">

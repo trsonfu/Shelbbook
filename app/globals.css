@@ -1,8 +1,8 @@
 @import "@shelby-protocol/ui/globals.css";
 @import "tailwindcss";
 
-/* Facebook-style Design System
- * Colors and styling inspired by Facebook's modern interface
+/* Shelbook-style Design System
+ * Colors and styling inspired by Shelbook's modern interface
  */
 @theme {
   --color-background: var(--app-background-color);
@@ -13,7 +13,7 @@
   --color-muted: var(--app-muted-color);
   --color-muted-2: var(--app-muted-2-color);
 
-  /* Facebook blue as primary brand color */
+  /* Shelbook blue as primary brand color */
   --color-brand: var(--app-brand-color);
   --color-brand-strong: var(--app-brand-strong-color);
   --color-brand-strong-hover: var(--app-brand-strong-hover-color);
@@ -22,13 +22,13 @@
   --font-mono: var(--font-geist-mono);
 }
 
-/* THEME PALETTES - Facebook Style */
+/* THEME PALETTES - Shelbook Style */
 
 :root {
   color-scheme: light;
 }
 
-/* Light Mode - Facebook Default */
+/* Light Mode - Shelbook Default */
 :root[data-theme='light'],
 :root:not(.dark) {
   color-scheme: light;
@@ -40,14 +40,14 @@
   --app-muted-color: #65676b;
   --app-muted-2-color: #8a8d91;
 
-  --app-brand-color: #1877f2; /* Facebook blue */
+  --app-brand-color: #1877f2; /* Shelbook blue */
   --app-brand-strong-color: #1877f2;
   --app-brand-strong-hover-color: #166fe5;
 
   --brand-gradient: linear-gradient(90deg, #1877f2, #42b72a);
 }
 
-/* Dark Mode - Facebook Dark Theme */
+/* Dark Mode - Shelbook Dark Theme */
 :root[data-theme='dark'],
 :root.dark {
   color-scheme: dark;
@@ -93,7 +93,7 @@ body {
   box-shadow: 0 0 0 3px rgba(24, 119, 242, 0.35);
 }
 
-/* Facebook-style card shadows */
+/* Shelbook-style card shadows */
 .fb-card {
   background: var(--app-surface-color);
   border: 1px solid var(--app-border-color);
@@ -120,7 +120,7 @@ body {
   }
 }
 
-/* Custom scrollbar - Facebook style */
+/* Custom scrollbar - Shelbook style */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
