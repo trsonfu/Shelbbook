@@ -91,7 +91,7 @@ Supabase    Shelby Protocol
 ```
 
 **📐 For detailed architecture diagrams, database schema, and technical docs:**
-→ **[View Architecture Documentation](./ARCHITECTURE_DIAGRAMS.md)**
+→ **[View Architecture Documentation](./docs/ARCHITECTURE_DIAGRAMS.md)**
 
 ---
 
@@ -143,10 +143,10 @@ OPENAI_API_KEY=your-openai-key
 
 ## 📚 Documentation
 
-- **[Architecture & System Design](./ARCHITECTURE_DIAGRAMS.md)** - Complete technical documentation
-- **API Endpoints** - See [ARCHITECTURE_DIAGRAMS.md](./ARCHITECTURE_DIAGRAMS.md#api-endpoints)
-- **Database Schema** - See [ARCHITECTURE_DIAGRAMS.md](./ARCHITECTURE_DIAGRAMS.md#database-schema)
-- **Upload Flow** - See [ARCHITECTURE_DIAGRAMS.md](./ARCHITECTURE_DIAGRAMS.md#upload-flow)
+- **[Architecture & System Design](./docs/ARCHITECTURE_DIAGRAMS.md)** - Complete technical documentation
+- **API Endpoints** - See [ARCHITECTURE_DIAGRAMS.md](./docs/ARCHITECTURE_DIAGRAMS.md#api-endpoints)
+- **Database Schema** - See [ARCHITECTURE_DIAGRAMS.md](./docs/ARCHITECTURE_DIAGRAMS.md#database-schema)
+- **Upload Flow** - See [ARCHITECTURE_DIAGRAMS.md](./docs/ARCHITECTURE_DIAGRAMS.md#upload-flow)
 
 ---
 
@@ -300,7 +300,7 @@ This project is licensed under the MIT License.
 
 - **Live Demo:** [https://www.shelbook.xyz/](https://www.shelbook.xyz/)
 - **GitHub:** [https://github.com/trsonfu/Shelbook](https://github.com/trsonfu/Shelbook)
-- **Architecture Docs:** [ARCHITECTURE_DIAGRAMS.md](./ARCHITECTURE_DIAGRAMS.md)
+- **Architecture Docs:** [ARCHITECTURE_DIAGRAMS.md](./docs/ARCHITECTURE_DIAGRAMS.md)
 
 ---
 
