@@ -1,271 +1,582 @@
-# Profile System Architecture Diagram
+# Shelbook - Architecture & System Design
 
-## System Flow Diagram
+> **A decentralized social media platform built on Aptos blockchain with Shelby Protocol**
 
-```mermaid
-graph TD
-    A[User Connects Wallet] --> B[Session Created]
-    B --> C[Navigate to /profile/wallet_address]
-    C --> D[ProfilePage Component]
-    D --> E[GET /api/users/wallet_address]
-    
-    E --> F{Profile Exists?}
-    
-    F -->|No| G[Show Welcome Screen]
-    F -->|Yes| H[Show Profile Page]
-    
-    G --> I[User Clicks Set Up Profile]
-    I --> J[ProfileEditModal Opens]
-    J --> K[User Fills Form]
-    K --> L[Click Save]
-    
-    H --> M[User Clicks Edit Profile]
-    M --> J
-    
-    L --> N[PATCH /api/users/wallet_address]
-    N --> O{User Exists?}
-    
-    O -->|No| P[UPSERT: INSERT]
-    O -->|Yes| Q[UPSERT: UPDATE]
-    
-    P --> R[Return New User]
-    Q --> R
-    
-    R --> S[Update Frontend State]
-    S --> T[Refresh Profile Data]
-    T --> H
+## Table of Contents
+- [System Overview](#system-overview)
+- [Technology Stack](#technology-stack)
+- [Architecture Diagram](#architecture-diagram)
+- [Database Schema](#database-schema)
+- [API Endpoints](#api-endpoints)
+- [Upload Flow](#upload-flow)
+- [Story Feature](#story-feature)
+- [Authentication Flow](#authentication-flow)
+
+---
+
+## System Overview
+
+Shelbook is a Facebook-style social media application that combines:
+- **Decentralized Storage** - Files stored on Aptos blockchain via Shelby Protocol
+- **Traditional Database** - Metadata and relationships in Supabase (PostgreSQL)
+- **Web3 Authentication** - Wallet-based login (no passwords)
+- **Modern UI/UX** - Responsive Facebook-inspired interface
+
+---
+
+## Technology Stack
+
+### Frontend
+- **Framework:** Next.js 16 (App Router with React Server Components)
+- **Styling:** Tailwind CSS v4
+- **UI Components:** shadcn/ui + Radix UI
+- **State Management:** React Hooks (useState, useEffect, useMemo)
+- **Wallet:** @aptos-labs/wallet-adapter-react
+
+### Backend
+- **API:** Next.js API Routes (serverless)
+- **Database:** Supabase (PostgreSQL)
+- **Authentication:** Cookie-based sessions
+- **Storage:** Shelby Protocol (Aptos blockchain)
+
+### Blockchain
+- **Network:** Aptos
+- **Storage Protocol:** Shelby Protocol
+- **File Encoding:** Custom encoding for on-chain commitment
+- **Blob Storage:** Shelby RPC nodes
+
+---
+
+## Architecture Diagram
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                         Frontend (Next.js)                   │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
+│  │   Home Feed  │  │   Stories    │  │   Profile    │      │
+│  └──────────────┘  └──────────────┘  └──────────────┘      │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
+│  │  Post Modal  │  │  Story Modal │  │   Explore    │      │
+│  └──────────────┘  └──────────────┘  └──────────────┘      │
+└─────────────────────────────────────────────────────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────────┐
+│                    API Layer (Next.js Routes)                │
+│  /api/posts      /api/stories     /api/users                │
+│  /api/upload     /api/auth        /api/comments             │
+└─────────────────────────────────────────────────────────────┘
+         ↓                              ↓
+┌──────────────────────┐    ┌──────────────────────┐
+│   Shelby Protocol    │    │      Supabase        │
+│  (Aptos Blockchain)  │    │    (PostgreSQL)      │
+│                      │    │                      │
+│  • File Storage      │    │  • Users             │
+│  • Blob Commitments  │    │  • Posts             │
+│  • RPC Upload        │    │  • Stories (24h)     │
+│  • Decentralized     │    │  • Comments          │
+│  • On-chain Proofs   │    │  • Likes             │
+│                      │    │  • Follows           │
+└──────────────────────┘    └──────────────────────┘
 ```
 
-## Database Schema Diagram
+---
 
-```mermaid
-erDiagram
-    USERS ||--o{ POSTS : creates
-    USERS ||--o{ LIKES : makes
-    USERS ||--o{ COMMENTS : writes
-    USERS ||--o{ FOLLOWS : follows
-    USERS ||--o{ FOLLOWS : followed_by
-    POSTS ||--o{ LIKES : receives
-    POSTS ||--o{ COMMENTS : has
-    
-    USERS {
-        uuid id PK
-        text wallet_address UK
-        text username UK
-        text display_name
-        text avatar_url
-        text bio
-        timestamp created_at
-        timestamp updated_at
-    }
-    
-    POSTS {
-        uuid id PK
-        uuid user_id FK
-        text caption
-        text media_url
-        text media_type
-        text blob_id
-        timestamp created_at
-        timestamp updated_at
-    }
-    
-    LIKES {
-        uuid id PK
-        uuid user_id FK
-        uuid post_id FK
-        timestamp created_at
-    }
-    
-    COMMENTS {
-        uuid id PK
-        uuid user_id FK
-        uuid post_id FK
-        text content
-        timestamp created_at
-        timestamp updated_at
-    }
-    
-    FOLLOWS {
-        uuid id PK
-        uuid follower_id FK
-        uuid following_id FK
-        timestamp created_at
-    }
+## Database Schema
+
+### Core Tables
+
+#### `users`
+```sql
+- id (UUID, primary key)
+- wallet_address (TEXT, unique) -- Aptos wallet
+- username (TEXT)
+- display_name (TEXT)
+- avatar_url (TEXT)
+- bio (TEXT)
+- created_at, updated_at
 ```
 
-## API Request Flow
-
-```mermaid
-sequenceDiagram
-    participant User
-    participant Browser
-    participant Next.js
-    participant API
-    participant Supabase
-    
-    User->>Browser: Click "Set Up Profile"
-    Browser->>Browser: Open ProfileEditModal
-    User->>Browser: Fill form & click Save
-    
-    Browser->>API: PATCH /api/users/[wallet_address]
-    Note over Browser,API: { display_name, bio, avatar_url }
-    
-    API->>API: Validate wallet address
-    API->>Supabase: Check if user exists
-    
-    alt User doesn't exist
-        API->>Supabase: INSERT new user (UPSERT)
-        Supabase-->>API: Return new user
-    else User exists
-        API->>Supabase: UPDATE existing user (UPSERT)
-        Supabase-->>API: Return updated user
-    end
-    
-    API-->>Browser: { success: true, user: {...} }
-    Browser->>Browser: Update state
-    Browser->>API: GET /api/users/[wallet_address]
-    API->>Supabase: Fetch user with stats
-    Supabase-->>API: User + followers/following counts
-    API-->>Browser: Full profile data
-    Browser->>User: Show updated profile
+#### `posts`
+```sql
+- id (UUID, primary key)
+- user_id (UUID → users)
+- shelby_file_id (TEXT) -- Blockchain blob ID
+- shelby_file_url (TEXT) -- CDN URL
+- file_type (image/video)
+- caption (TEXT)
+- media_width, media_height (INTEGER)
+- created_at, updated_at
 ```
 
-## Component Hierarchy
-
-```mermaid
-graph TD
-    A[ProfilePage] --> B[FacebookProfile]
-    B --> C[ProfileHeader]
-    B --> D[ProfileActions]
-    B --> E[ProfileStats]
-    B --> F[ProfilePosts]
-    B --> G[ProfileEditModal]
-    
-    C --> C1[Cover Photo]
-    C --> C2[Avatar]
-    C --> C3[User Info]
-    
-    D --> D1[Edit Button]
-    D --> D2[Follow Button]
-    
-    E --> E1[Followers Count]
-    E --> E2[Following Count]
-    E --> E3[Posts Count]
-    
-    F --> F1[Post Grid]
-    
-    G --> G1[Display Name Input]
-    G --> G2[Bio Textarea]
-    G --> G3[Avatar URL Input]
-    G --> G4[Save Button]
-    
-    style B fill:#2d88ff
-    style G fill:#1877f2
+#### `stories` ⭐ NEW
+```sql
+- id (UUID, primary key)
+- user_id (UUID → users)
+- shelby_file_id (TEXT)
+- shelby_file_url (TEXT)
+- file_type (image/video)
+- caption (TEXT)
+- media_width, media_height (INTEGER)
+- created_at
+- expires_at (created_at + 24 hours)
+- updated_at
 ```
 
-## State Management Flow
-
-```mermaid
-stateDiagram-v2
-    [*] --> Loading: Component Mount
-    Loading --> ProfileNotFound: API returns null
-    Loading --> ProfileLoaded: API returns user
-    
-    ProfileNotFound --> SetupScreen: Is Own Profile
-    ProfileNotFound --> NotFoundScreen: Is Other User
-    
-    SetupScreen --> EditModal: Click Setup
-    ProfileLoaded --> EditModal: Click Edit
-    
-    EditModal --> Saving: Click Save
-    Saving --> ProfileLoaded: Success
-    Saving --> Error: Failure
-    
-    Error --> EditModal: Retry
-    ProfileLoaded --> [*]: Unmount
+#### `comments`
+```sql
+- id (UUID, primary key)
+- user_id (UUID → users)
+- post_id (UUID → posts)
+- content (TEXT)
+- created_at, updated_at
 ```
 
-## Authentication & Authorization Flow
-
-```mermaid
-graph LR
-    A[Connect Wallet] --> B[Create Session]
-    B --> C[Store wallet_address in Session]
-    C --> D[Navigate to Profile]
-    
-    D --> E{Is Own Profile?}
-    E -->|Yes| F[Show Edit Button]
-    E -->|No| G[Show Follow Button]
-    
-    F --> H[Can Edit]
-    G --> I[Can View Only]
-    
-    style E fill:#ffd700
-    style F fill:#90EE90
-    style G fill:#87CEEB
+#### `likes`
+```sql
+- id (UUID, primary key)
+- user_id (UUID → users)
+- post_id (UUID → posts)
+- created_at
+- UNIQUE(user_id, post_id)
 ```
 
-## Data Flow: Create New Profile
-
-```mermaid
-flowchart LR
-    A[User Input] --> B[Form Data]
-    B --> C[PATCH Request]
-    C --> D[API Handler]
-    D --> E{Validate Data}
-    E -->|Invalid| F[Return Error]
-    E -->|Valid| G[Supabase UPSERT]
-    G --> H[Check Unique Constraints]
-    H -->|Conflict| I[Update Existing]
-    H -->|No Conflict| J[Insert New]
-    I --> K[Return User]
-    J --> K
-    K --> L[Update Frontend]
-    L --> M[Show Profile]
-    
-    style G fill:#2d88ff
-    style K fill:#90EE90
+#### `follows`
+```sql
+- id (UUID, primary key)
+- follower_id (UUID → users)
+- following_id (UUID → users)
+- created_at
+- UNIQUE(follower_id, following_id)
 ```
 
-## Viewing the Diagrams
+#### `story_views` ⭐ NEW
+```sql
+- id (UUID, primary key)
+- story_id (UUID → stories)
+- user_id (UUID → users)
+- viewed_at
+- UNIQUE(story_id, user_id)
+```
 
-To view these Mermaid diagrams:
+---
 
-1. **GitHub/GitLab:** View this file on GitHub - diagrams render automatically
-2. **VS Code:** Install "Markdown Preview Mermaid Support" extension
-3. **Online:** Copy diagram code to https://mermaid.live/
-4. **Documentation Site:** Use any docs platform that supports Mermaid (Docusaurus, VuePress, etc.)
+## API Endpoints
 
-## Understanding the Architecture
+### Authentication
+```
+POST   /api/auth/login      - Create session (wallet address)
+POST   /api/auth/logout     - Destroy session
+```
 
-### Key Concepts
+### Posts
+```
+GET    /api/posts           - Fetch all posts with user data
+POST   /api/upload          - Upload post (via Shelby)
+GET    /api/posts/[id]      - Get single post
+DELETE /api/posts/[id]      - Delete post
+POST   /api/posts/[id]/like - Toggle like
+GET    /api/posts/[id]/comments - Get comments
+POST   /api/posts/[id]/comments - Add comment
+```
 
-1. **UPSERT Pattern**: Single operation that creates OR updates based on unique constraint
-2. **Wallet-First Design**: Profiles are keyed by wallet address, not email
-3. **Optimistic UI**: UI updates immediately, then confirms with server
-4. **Profile Ownership**: Determined by comparing wallet addresses
-5. **Graceful Degradation**: Shows setup screen for new users, not errors
+### Stories ⭐ NEW
+```
+GET    /api/stories         - Fetch active stories (< 24h)
+POST   /api/stories         - Upload story (via Shelby)
+```
 
-### Data Flow Principles
+### Users
+```
+GET    /api/users/[id]      - Get user profile
+PATCH  /api/users/[id]      - Update profile (upsert)
+POST   /api/users/[id]/follow - Toggle follow
+```
 
-1. **Server Components** fetch initial data (page.tsx)
-2. **Client Components** handle interactivity (FacebookProfile.tsx)
-3. **API Routes** validate and persist to database
-4. **State Management** keeps UI in sync with backend
-5. **Session** provides authentication context
+---
 
-### Security Model
+## Upload Flow
 
-1. **Authentication**: Wallet signature proves identity
-2. **Session**: Server-side cookie stores wallet address
-3. **Authorization**: Client-side checks (future: add server-side)
-4. **Validation**: API validates all inputs
-5. **Constraints**: Database enforces uniqueness
+### Post/Story Upload Process
 
-## Next Steps
+```
+┌─────────────────────────────────────────────────────────┐
+│ 1. USER SELECTS FILE                                    │
+│    - Image or Video (max 100MB)                         │
+│    - Add caption (optional)                             │
+└────────────────────┬────────────────────────────────────┘
+                     ↓
+┌─────────────────────────────────────────────────────────┐
+│ 2. ENCODE FILE (10%)                                    │
+│    - Convert file to chunks                             │
+│    - Create commitments for blockchain                  │
+│    - Prepare for on-chain submission                    │
+└────────────────────┬────────────────────────────────────┘
+                     ↓
+┌─────────────────────────────────────────────────────────┐
+│ 3. SUBMIT TO BLOCKCHAIN (30%)                           │
+│    - Submit file commitments to Aptos                   │
+│    - Create on-chain proof of storage                   │
+│    - Generate blob ID                                   │
+└────────────────────┬────────────────────────────────────┘
+                     ↓
+┌─────────────────────────────────────────────────────────┐
+│ 4. UPLOAD TO SHELBY RPC (60%)                           │
+│    - Upload actual file data to Shelby nodes            │
+│    - Distribute across decentralized network            │
+│    - Get CDN URL for retrieval                          │
+└────────────────────┬────────────────────────────────────┘
+                     ↓
+┌─────────────────────────────────────────────────────────┐
+│ 5. SAVE TO DATABASE (90%)                               │
+│    - Store metadata in Supabase                         │
+│    - Link file URL to user                              │
+│    - Set expiry (stories only: 24h)                     │
+└────────────────────┬────────────────────────────────────┘
+                     ↓
+┌─────────────────────────────────────────────────────────┐
+│ 6. COMPLETE (100%)                                      │
+│    - Refresh UI                                         │
+│    - Show post/story                                    │
+│    - Redirect/close modal                               │
+└─────────────────────────────────────────────────────────┘
+```
 
-- Review these diagrams to understand the architecture
-- Follow QUICK_START.md to set up the system
-- Use DEPLOYMENT_CHECKLIST.md to test thoroughly
-- Refer to IMPLEMENTATION_SUMMARY.md for details
+### File Storage Structure
+```
+Shelby CDN URL Format:
+https://api.shelbynet.shelby.xyz/v1/blobs/{walletAddress}/{blobName}
+
+Post Blob Name:
+{timestamp}-{filename}
+
+Story Blob Name:
+story-{timestamp}-{filename}
+```
+
+---
+
+## Story Feature
+
+### Overview
+Stories are temporary posts that expire after 24 hours, similar to Instagram/Facebook Stories.
+
+### Key Features
+- **24-Hour Expiry** - Auto-deleted after `expires_at` timestamp
+- **Shelby Storage** - Same decentralized protocol as posts
+- **Image & Video** - Both formats supported
+- **Optional Captions** - Up to 150 characters
+- **View Tracking** - Track who viewed (future feature)
+
+### Story Lifecycle
+
+```
+┌──────────────┐
+│  User Posts  │
+│    Story     │
+└──────┬───────┘
+       ↓
+┌──────────────────────────────────┐
+│  Upload via Shelby Protocol      │
+│  (same as posts)                 │
+└──────┬───────────────────────────┘
+       ↓
+┌──────────────────────────────────┐
+│  Saved to Database                │
+│  - created_at: NOW()             │
+│  - expires_at: NOW() + 24h       │
+└──────┬───────────────────────────┘
+       ↓
+┌──────────────────────────────────┐
+│  Visible for 24 Hours            │
+│  - Shows in stories carousel     │
+│  - Full-screen viewing           │
+│  - User avatars with rings       │
+└──────┬───────────────────────────┘
+       ↓
+┌──────────────────────────────────┐
+│  Auto-Expires                    │
+│  - No longer returned by API     │
+│  - Filtered by expires_at        │
+│  - Database cleanup (optional)   │
+└──────────────────────────────────┘
+```
+
+### Story vs Post Comparison
+
+| Feature | Posts | Stories |
+|---------|-------|---------|
+| **Storage** | Shelby Protocol | Shelby Protocol |
+| **Expiry** | Never | 24 hours |
+| **Display** | Vertical feed | Horizontal carousel |
+| **Captions** | Unlimited | 150 chars |
+| **Interactions** | Likes, Comments | Views (future) |
+| **Visibility** | Profile + Feed | Stories section only |
+| **API Endpoint** | `/api/upload` | `/api/stories` |
+
+---
+
+## Authentication Flow
+
+### Wallet-Based Login
+
+```
+┌──────────────────────────────────────────────────────────┐
+│ 1. USER CONNECTS WALLET                                  │
+│    - Click "Connect Wallet" button                       │
+│    - Select wallet provider (Petra, Martian, etc.)       │
+│    - Approve connection                                  │
+└────────────────────┬─────────────────────────────────────┘
+                     ↓
+┌──────────────────────────────────────────────────────────┐
+│ 2. WALLET DETECTED (WalletChangeDetector)                │
+│    - Detect wallet connection                            │
+│    - Get wallet address                                  │
+│    - Send to authentication API                          │
+└────────────────────┬─────────────────────────────────────┘
+                     ↓
+┌──────────────────────────────────────────────────────────┐
+│ 3. CHECK/CREATE USER (API)                               │
+│    - Look up user by wallet address                      │
+│    - If not exists: Create new user                      │
+│    - Generate username: user_{address}                   │
+└────────────────────┬─────────────────────────────────────┘
+                     ↓
+┌──────────────────────────────────────────────────────────┐
+│ 4. CREATE SESSION                                        │
+│    - Set session cookie (httpOnly)                       │
+│    - Include: walletAddress, userId, expiry (7 days)     │
+│    - Store in Next.js cookies                            │
+└────────────────────┬─────────────────────────────────────┘
+                     ↓
+┌──────────────────────────────────────────────────────────┐
+│ 5. USER AUTHENTICATED                                    │
+│    - Access to post/story creation                       │
+│    - Profile management                                  │
+│    - Interactions (likes, comments, follows)             │
+└──────────────────────────────────────────────────────────┘
+```
+
+### Session Management
+- **Storage:** HTTP-only cookies
+- **Duration:** 7 days
+- **Content:** `{ walletAddress, userId, expiresAt }`
+- **Validation:** Checked on protected routes
+- **Refresh:** Automatic on wallet change
+
+---
+
+## Component Architecture
+
+### Layout Components
+```
+FacebookHeader (top nav)
+├─ Logo
+├─ Search bar
+├─ Navigation icons (Home, Friends)
+├─ Wallet selector
+└─ Profile avatar
+
+FacebookLeftSidebar
+├─ User profile link
+├─ Navigation items
+└─ Shortcuts
+
+BottomNav (mobile)
+├─ Home
+├─ Create
+├─ Notifications
+└─ Profile
+```
+
+### Content Components
+```
+Feed
+├─ FacebookStories (horizontal carousel)
+│  ├─ Create Story button → CreateStoryModal
+│  └─ Story cards → /story/[id]
+├─ CreatePostBox → CreatePostModal
+└─ PostCard[]
+   ├─ User info
+   ├─ Media (image/video)
+   ├─ Caption
+   └─ Interactions (like, comment, share)
+
+Profile
+├─ Cover photo
+├─ Profile info (avatar, name, bio)
+├─ Stats (posts, followers, following)
+└─ Posts grid
+```
+
+### Modal Components
+```
+CreatePostModal
+├─ File upload (drag & drop)
+├─ Caption input
+├─ Progress tracker (Shelby upload)
+└─ Submit button
+
+CreateStoryModal
+├─ File upload
+├─ Caption input (150 char limit)
+├─ 24-hour expiry notice
+├─ Progress tracker (Shelby upload)
+└─ Share button
+
+ProfileEditModal
+├─ Avatar upload
+├─ Username/Display name
+├─ Bio
+└─ Save button
+```
+
+---
+
+## Data Flow Examples
+
+### Creating a Post
+```
+User → CreatePostModal → Shelby Protocol → Supabase → Feed
+  1. Select file & add caption
+  2. Encode & upload via Shelby
+  3. Save metadata to posts table
+  4. Refresh feed to show new post
+```
+
+### Creating a Story
+```
+User → CreateStoryModal → Shelby Protocol → Supabase → Stories Carousel
+  1. Select file & add caption
+  2. Encode & upload via Shelby (story-prefixed blob)
+  3. Save metadata to stories table (with 24h expiry)
+  4. Refresh stories to show new story
+```
+
+### Viewing Feed
+```
+Homepage → /api/posts → Supabase → Returns posts with user data
+  1. Fetch posts (joined with users)
+  2. Fetch stories (< 24h only)
+  3. Render stories carousel + post feed
+```
+
+### Authentication
+```
+Wallet Connect → /api/auth/login → Supabase → Create/Update User
+  1. User connects wallet
+  2. Backend checks if user exists (by wallet_address)
+  3. Create user if new, update session if exists
+  4. Set httpOnly cookie with session data
+```
+
+---
+
+## Security & Best Practices
+
+### Authentication
+- ✅ HTTP-only cookies (XSS protection)
+- ✅ Wallet signature verification
+- ✅ Session expiry (7 days)
+- ✅ No passwords stored
+
+### File Upload
+- ✅ Client-side validation (size, type)
+- ✅ Blockchain proof of storage
+- ✅ Decentralized storage (censorship-resistant)
+- ✅ CDN delivery (fast access)
+
+### Database
+- ✅ Row-level security (Supabase)
+- ✅ Foreign key constraints
+- ✅ Indexed queries (performance)
+- ✅ Soft deletes (data retention)
+
+### API
+- ✅ Authentication middleware
+- ✅ Rate limiting (TODO)
+- ✅ Error handling
+- ✅ CORS configuration
+
+---
+
+## Performance Optimizations
+
+### Frontend
+- **Static Generation** - Homepage pre-rendered
+- **Code Splitting** - Lazy load modals
+- **Image Optimization** - Next.js Image component
+- **Caching** - React Server Components cache
+
+### Database
+- **Indexes** - On user_id, created_at, expires_at
+- **Joins** - Efficient with select() syntax
+- **Pagination** - Limit/offset for feeds (TODO)
+- **Connection Pooling** - Supabase built-in
+
+### Storage
+- **CDN** - Shelby provides edge caching
+- **Blob Deduplication** - Blockchain prevents duplicates
+- **Lazy Loading** - Images load as needed
+- **Video Streaming** - Progressive playback
+
+---
+
+## Future Enhancements
+
+### Planned Features
+- [ ] Story view tracking & analytics
+- [ ] Story replies (DMs)
+- [ ] Story reactions (emoji)
+- [ ] Infinite scroll pagination
+- [ ] Real-time notifications (WebSocket)
+- [ ] Advanced search
+- [ ] Hashtags & mentions
+- [ ] Direct messaging
+- [ ] Groups & events
+- [ ] Story highlights (save to profile)
+
+### Technical Improvements
+- [ ] Redis caching layer
+- [ ] CDN for static assets
+- [ ] GraphQL API
+- [ ] Mobile app (React Native)
+- [ ] E2E testing (Playwright)
+- [ ] Performance monitoring
+- [ ] Analytics dashboard
+
+---
+
+## Deployment Architecture
+
+```
+┌────────────────────────────────────────────────────┐
+│                   Vercel Edge                       │
+│  - Next.js SSR/SSG                                 │
+│  - API Routes                                      │
+│  - Automatic Deployments                           │
+└────────────┬───────────────────────────────────────┘
+             ↓
+┌────────────────────────────────────────────────────┐
+│                  Supabase Cloud                     │
+│  - PostgreSQL Database                             │
+│  - Real-time Subscriptions                         │
+│  - Row-Level Security                              │
+└────────────┬───────────────────────────────────────┘
+             ↓
+┌────────────────────────────────────────────────────┐
+│             Aptos Blockchain (Mainnet)             │
+│  - Shelby Protocol                                 │
+│  - Decentralized Storage                           │
+│  - On-chain Proofs                                 │
+└────────────────────────────────────────────────────┘
+```
+
+---
+
+## Getting Started
+
+For setup instructions, deployment guides, and more, see the [README.md](./README.md).
+
+---
+
+**Built with ❤️ using Next.js, Aptos, and Shelby Protocol**
