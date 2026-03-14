@@ -38,8 +38,10 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
-     * - public files
+     * - public files (svg, png, jpg, etc.)
      */
     '/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)).*)',
   ],
+  // Explicitly set runtime for Vercel Edge
+  runtime: 'nodejs',
 }
