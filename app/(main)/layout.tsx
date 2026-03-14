@@ -3,10 +3,14 @@ import FacebookHeader from '@/components/layout/FacebookHeader'
 import FacebookLeftSidebar from '@/components/layout/FacebookLeftSidebar'
 import FacebookRightSidebar from '@/components/layout/FacebookRightSidebar'
 import BottomNav from '@/components/layout/BottomNav'
+import { WalletChangeDetector } from '@/components/auth/WalletChangeDetector'
 
 export default function MainLayout({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-[#18191a]">
+      {/* Wallet Change Detector - Auto re-login on wallet switch */}
+      <WalletChangeDetector />
+      
       {/* Fixed Header */}
       <FacebookHeader />
 
