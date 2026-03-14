@@ -68,11 +68,18 @@ export default function PostCard({ post }: PostCardProps) {
             </div>
           </Link>
           <div className="flex-1">
-            <Link href={`/profile/${post.user_id}`}>
-              <h3 className="font-semibold text-gray-900 dark:text-gray-100 hover:underline text-[15px]">
-                {post.user?.display_name || post.user?.username || 'Unknown User'}
-              </h3>
-            </Link>
+            <div className="flex items-center gap-2">
+              <Link href={`/profile/${post.user_id}`}>
+                <h3 className="font-semibold text-gray-900 dark:text-gray-100 hover:underline text-[15px]">
+                  {post.user?.display_name || post.user?.username || 'Unknown User'}
+                </h3>
+              </Link>
+              {post.id.startsWith('mock-') && (
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300">
+                  Mock Data
+                </span>
+              )}
+            </div>
             <p className="text-xs text-gray-500 dark:text-gray-400">{formatDate(post.created_at)}</p>
           </div>
         </div>
