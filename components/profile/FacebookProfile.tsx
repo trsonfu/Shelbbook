@@ -47,22 +47,34 @@ export default function FacebookProfile({ userId, currentUserId, currentWalletAd
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [walletAddress, setWalletAddress] = useState<string | null>(null)
   
+  // Log component props on mount
+  useEffect(() => {
+    console.log('=== FacebookProfile Component Props ===')
+    console.log('userId:', userId)
+    console.log('currentUserId:', currentUserId)
+    console.log('currentWalletAddress:', currentWalletAddress)
+    console.log('======================================')
+  }, [userId, currentUserId, currentWalletAddress])
+  
   // Check if this is the user's own profile - recalculate when dependencies change
   const isOwnProfile = useMemo(() => {
-    const result = userId === currentUserId || 
-           (currentWalletAddress && userId === currentWalletAddress) ||
-           (walletAddress && currentWalletAddress && walletAddress === currentWalletAddress)
+    // Method 1: Direct wallet address comparison (most reliable for new wallets)
+    const directWalletMatch = currentWalletAddress && userId === currentWalletAddress
     
-    console.log('isOwnProfile calculation:', {
-      result,
-      userId,
-      currentUserId,
-      currentWalletAddress,
-      walletAddress,
-      match1: userId === currentUserId,
-      match2: currentWalletAddress && userId === currentWalletAddress,
-      match3: walletAddress && currentWalletAddress && walletAddress === currentWalletAddress
-    })
+    // Method 2: UUID comparison (for existing users)
+    const uuidMatch = userId === currentUserId
+    
+    // Method 3: API-fetched wallet address comparison
+    const apiFetchedMatch = walletAddress && currentWalletAddress && walletAddress === currentWalletAddress
+    
+    const result = directWalletMatch || uuidMatch || apiFetchedMatch
+    
+    console.log('=== isOwnProfile Calculation ===')
+    console.log('Result:', result)
+    console.log('Method 1 - Direct wallet match:', directWalletMatch, `(userId: ${userId} === currentWalletAddress: ${currentWalletAddress})`)
+    console.log('Method 2 - UUID match:', uuidMatch, `(userId: ${userId} === currentUserId: ${currentUserId})`)
+    console.log('Method 3 - API fetched match:', apiFetchedMatch, `(walletAddress: ${walletAddress} === currentWalletAddress: ${currentWalletAddress})`)
+    console.log('================================')
     
     return result
   }, [userId, currentUserId, currentWalletAddress, walletAddress])
