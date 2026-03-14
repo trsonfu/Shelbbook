@@ -6,6 +6,85 @@ import CreatePostBox from './CreatePostBox'
 import FacebookStories from '@/components/story/FacebookStories'
 import type { Post } from '@/types'
 
+// Mock posts for demo purposes
+const MOCK_POSTS: Post[] = [
+  {
+    id: 'mock-1',
+    user_id: 'demo-user-1',
+    shelby_file_id: 'demo-file-1',
+    shelby_file_url: 'https://images.unsplash.com/photo-1682687220742-aba13b6e50ba?w=800&h=600&fit=crop',
+    file_type: 'image',
+    media_width: 800,
+    media_height: 600,
+    caption: 'Beautiful sunset view from the mountains 🌄 Nothing beats nature\'s artwork!',
+    created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
+    updated_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+    user: {
+      id: 'demo-user-1',
+      wallet_address: '0x1234567890abcdef1234567890abcdef12345678',
+      username: 'nature_lover',
+      display_name: 'Alex Chen',
+      avatar_url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Alex',
+      bio: 'Nature photographer',
+      created_at: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+      updated_at: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+    },
+    likes_count: 42,
+    comments_count: 8,
+    is_liked: false,
+  },
+  {
+    id: 'mock-2',
+    user_id: 'demo-user-2',
+    shelby_file_id: 'demo-file-2',
+    shelby_file_url: 'https://images.unsplash.com/photo-1682687221038-404cb8830901?w=800&h=1000&fit=crop',
+    file_type: 'image',
+    media_width: 800,
+    media_height: 1000,
+    caption: 'Just finished my latest coding project! 💻✨ Building the future one line at a time.',
+    created_at: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(), // 5 hours ago
+    updated_at: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
+    user: {
+      id: 'demo-user-2',
+      wallet_address: '0xabcdef1234567890abcdef1234567890abcdef12',
+      username: 'dev_sarah',
+      display_name: 'Sarah Johnson',
+      avatar_url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah',
+      bio: 'Full-stack developer',
+      created_at: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString(),
+      updated_at: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString(),
+    },
+    likes_count: 127,
+    comments_count: 15,
+    is_liked: true,
+  },
+  {
+    id: 'mock-3',
+    user_id: 'demo-user-3',
+    shelby_file_id: 'demo-file-3',
+    shelby_file_url: 'https://images.unsplash.com/photo-1682687982501-1e58ab814714?w=800&h=800&fit=crop',
+    file_type: 'image',
+    media_width: 800,
+    media_height: 800,
+    caption: 'Coffee and creativity ☕️📝 My favorite way to start the day!',
+    created_at: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString(), // 8 hours ago
+    updated_at: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString(),
+    user: {
+      id: 'demo-user-3',
+      wallet_address: '0x7890abcdef1234567890abcdef1234567890abcd',
+      username: 'creative_mike',
+      display_name: 'Mike Rodriguez',
+      avatar_url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Mike',
+      bio: 'Designer & Artist',
+      created_at: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString(),
+      updated_at: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString(),
+    },
+    likes_count: 89,
+    comments_count: 12,
+    is_liked: false,
+  },
+]
+
 export default function Feed() {
   const [posts, setPosts] = useState<Post[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -25,11 +104,20 @@ export default function Feed() {
           console.warn('Posts API warning:', data.error)
         }
         
-        setPosts(data.posts || [])
+        const fetchedPosts = data.posts || []
+        
+        // If no posts from API, show mock posts for demo
+        if (fetchedPosts.length === 0) {
+          console.log('No posts from API, showing mock posts for demo')
+          setPosts(MOCK_POSTS)
+        } else {
+          setPosts(fetchedPosts)
+        }
       } catch (err) {
         console.error('Error fetching posts:', err)
-        setError(err instanceof Error ? err.message : 'Failed to load posts')
-        setPosts([]) // Set empty posts on error
+        // Show mock posts even on error for demo purposes
+        console.log('Error fetching posts, showing mock posts for demo')
+        setPosts(MOCK_POSTS)
       } finally {
         setIsLoading(false)
       }
@@ -43,33 +131,6 @@ export default function Feed() {
       <div className="text-center py-12">
         <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-500 border-r-transparent"></div>
         <p className="text-gray-600 dark:text-gray-400 mt-4">Loading posts...</p>
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <div className="text-center py-12">
-        <p className="text-red-500 text-lg">{error}</p>
-        <button 
-          onClick={() => window.location.reload()} 
-          className="mt-4 px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-        >
-          Retry
-        </button>
-      </div>
-    )
-  }
-
-  if (posts.length === 0) {
-    return (
-      <div>
-        <FacebookStories />
-        <CreatePostBox />
-        <div className="text-center py-12 bg-white dark:bg-[#242526] rounded-lg shadow-sm border border-gray-200 dark:border-[#3e4042]">
-          <p className="text-gray-600 dark:text-gray-400 text-lg">No posts yet</p>
-          <p className="text-gray-500 dark:text-gray-500 mt-2">Be the first to share something!</p>
-        </div>
       </div>
     )
   }
@@ -88,6 +149,14 @@ export default function Feed() {
           <PostCard key={post.id} post={post} />
         ))}
       </section>
+      
+      {posts.length > 0 && posts[0].id.startsWith('mock-') && (
+        <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-center">
+          <p className="text-sm text-blue-600 dark:text-blue-400">
+            These are demo posts. Create your first post to see your own content!
+          </p>
+        </div>
+      )}
     </div>
   )
 }
